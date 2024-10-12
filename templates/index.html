@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fred Again Song Guessing Game</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script>
+    async function playClip() {
+      const mode = document.getElementById("gameMode").value;
+      const duration = document.getElementById("duration").value;
+      const audio = document.getElementById("audioPlayer");
+
+      try {
+        const response = await fetch(`/play?mode=${mode}&duration=${duration}`);
+        const blob = await response.blob();
+        audio.src = URL.createObjectURL(blob);
+        audio.play();
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+
+    async function submitGuess() {
+      const guess = document.getElementById("guessInput").value;
+      const mode = document.getElementById("gameMode").value;
+
+      try {
+        const response = await fetch("/guess", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guess, mode }),
+        });
+        const data = await response.json();
+        document.getElementById("result").textContent = `${data.result} (Score: ${data.score})`;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+
+  </script>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">Fred Again Song Guessing Game</h1>
+
+      <div class="field">
+        <label class="label">Game Mode</label>
+        <div class="control">
+          <select id="gameMode" class="select">
+            <option value="song">Song</option>
+            <option value="album">Album</option>
+            <option value="set">Set</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Clip Duration (seconds)</label>
+        <div class="control">
+          <select id="duration" class="select">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="button is-primary" onclick="playClip()">Play Clip</button>
+
+      <div class="field">
+        <label class="label">Your Guess</label>
+        <input id="guessInput" class="input" type="text" placeholder="Enter your guess">
+      </div>
+
+      <button class="button is-link" onclick="submitGuess()">Submit Guess</button>
+
+      <p id="result" class="has-text-weight-bold mt-4"></p>
+
+      <audio id="audioPlayer" controls class="mt-4"></audio>
+    </div>
+  </section>
+</body>
+</html>
